@@ -1,0 +1,796 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile keyboard handling */
+:root {
+  --keyboard-offset: 100vh;
+}
+
+/* Autocomplete dropdown positioning */
+.autocomplete-dropdown {
+  bottom: calc(var(--keyboard-offset, 0px) + 10px);
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: calc(100% - 2rem) !important;
+  margin: 0 1rem !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ensure modals and dropdowns are above keyboard on mobile */
+@media (max-width: 768px) {
+  .z-50 {
+    z-index: 9999 !important;
+  }
+
+  /* Adjust modal positioning for mobile */
+  .modal-content {
+    max-height: calc(var(--keyboard-offset, 100vh) - 2rem);
+    overflow-y: auto;
+  }
+
+  /* Ensure dropdowns don't get cut off by keyboard */
+  .dropdown-results {
+    max-height: calc(var(--keyboard-offset, 100vh) * 0.4);
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+:root {
+  /* Paleta de colores según mockups */
+  --color-primary: #007bff; /* Azul océano */
+  --color-secondary: #6c757d; /* Gris medio */
+  --color-success: #28a745; /* Verde */
+  --color-warning: #ffc107; /* Naranja */
+  --color-danger: #dc3545; /* Rojo */
+  --color-light: #f8f9fa; /* Gris muy claro */
+  --color-dark: #343a40; /* Gris oscuro */
+  --color-white: #ffffff; /* Blanco */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode styles */
+.dark body {
+  background-color: #1a1a1a;
+  color: #e5e5e5;
+}
+
+/* Fix scroll issues */
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Ensure proper scrolling on mobile */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus rings */
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus,
+.dark button:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Animation for floating action button */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s ease-out;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-ocean {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.dark .loading-shimmer {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Sticky positioning fixes */
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+/* Ensure proper spacing for fixed elements */
+.pb-24 {
+  padding-bottom: 6rem;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Safari mobile viewport fix */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Estilos personalizados para componentes */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors duration-200;
+}
+
+.dark .btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-gray-200;
+}
+
+.card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200;
+}
+
+.dark .card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.input-field {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200;
+}
+
+.dark .input-field {
+  @apply bg-gray-700 border-gray-600 text-white;
+}
+
+.input-field.error {
+  @apply border-red-500 focus:ring-red-500;
+}
+
+/* Animaciones suaves */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para barras de progreso */
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+}
+
+.dark .progress-bar {
+  @apply bg-gray-700;
+}
+
+.progress-fill {
+  @apply h-2 rounded-full transition-all duration-300;
+}
+
+.progress-safe {
+  @apply bg-green-500;
+}
+
+.progress-warning {
+  @apply bg-yellow-500;
+}
+
+.progress-danger {
+  @apply bg-red-500;
+}
+
+/* Estilos para iconos */
+.icon-outline {
+  @apply stroke-current;
+  stroke-width: 1.5;
+}
+
+/* Estilos para navegación inferior */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2;
+  backdrop-filter: blur(10px);
+}
+
+.dark .bottom-nav {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.bottom-nav-item {
+  @apply flex flex-col items-center py-2 transition-colors duration-200;
+}
+
+.bottom-nav-item.active {
+  @apply text-blue-600;
+}
+
+.dark .bottom-nav-item.active {
+  @apply text-blue-400;
+}
+
+.bottom-nav-item.inactive {
+  @apply text-gray-400;
+}
+
+/* Estilos para botón flotante */
+.fab {
+  @apply fixed bottom-20 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 hover:scale-105 flex items-center justify-center z-10;
+}
+
+/* Estilos para tarjetas de viaje */
+.travel-card {
+  @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 overflow-hidden;
+}
+
+.dark .travel-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.travel-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Estilos para gráficos */
+.pie-chart-container {
+  @apply bg-white rounded-lg p-6 shadow-sm border border-gray-200;
+}
+
+.dark .pie-chart-container {
+  @apply bg-gray-800 border-gray-700;
+}
+
+/* Estilos para formularios */
+.form-section {
+  @apply space-y-6;
+}
+
+.form-group {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply block text-base font-semibold text-gray-800 mb-2;
+}
+
+.dark .form-label {
+  @apply text-gray-200;
+}
+
+.form-input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-white;
+}
+
+.dark .form-input {
+  @apply bg-gray-700 border-gray-600 text-white;
+}
+
+.form-input:focus {
+  @apply border-blue-500 shadow-sm;
+}
+
+.form-input.error {
+  @apply border-red-500 focus:ring-red-500 focus:border-red-500;
+}
+
+.input-field::placeholder {
+  @apply text-gray-400;
+}
+
+.dark .input-field::placeholder {
+  @apply text-gray-500;
+}
+
+.form-error {
+  @apply text-sm text-red-600 mt-1;
+}
+
+/* Estilos específicos para select */
+.form-input[type="date"],
+.form-input[type="number"] {
+  @apply appearance-none;
+}
+
+.form-input[type="date"]::-webkit-calendar-picker-indicator,
+.form-input[type="number"]::-webkit-inner-spin-button,
+.form-input[type="number"]::-webkit-outer-spin-button {
+  @apply appearance-none;
+}
+
+/* Prevent scroll wheel from changing number input values */
+input[type="number"]:focus {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Estilos para botones de formulario */
+.form-buttons {
+  @apply flex space-x-4 pt-6;
+}
+
+.form-button {
+  @apply flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+}
+
+.form-button-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md;
+}
+
+.form-button-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-700;
+}
+
+.dark .form-button-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-gray-200;
+}
+
+/* Estilos para el contenedor del formulario */
+.form-container {
+  @apply max-w-2xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  animation: slideInUp 0.3s ease-out;
+}
+
+.dark .form-container {
+  @apply bg-gray-800 border-gray-700;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para el header del formulario */
+.form-header {
+  @apply flex items-center justify-between mb-6 pb-4 border-b border-gray-200;
+}
+
+.dark .form-header {
+  @apply border-gray-700;
+}
+
+.form-title {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.dark .form-title {
+  @apply text-gray-100;
+}
+
+/* Estilos para grupos de campos */
+.form-field-group {
+  @apply space-y-4;
+}
+
+.form-field-row {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+/* Estilos para campos requeridos */
+.form-label.required::after {
+  content: " *";
+  @apply text-red-500;
+}
+
+/* Estilos para mensajes de éxito */
+.form-success {
+  @apply text-sm text-green-600 mt-1;
+}
+
+/* Estilos para campos deshabilitados */
+.form-input:disabled {
+  @apply bg-gray-100 text-gray-500 cursor-not-allowed;
+}
+
+.dark .form-input:disabled {
+  @apply bg-gray-800 text-gray-400;
+}
+
+/* Estilos para campos de solo lectura */
+.form-input[readonly] {
+  @apply bg-gray-50 text-gray-700;
+}
+
+.dark .form-input[readonly] {
+  @apply bg-gray-800 text-gray-300;
+}
+
+/* Estilos para estados vacíos */
+.empty-state {
+  @apply text-center py-16;
+}
+
+.empty-state-icon {
+  @apply w-24 h-24 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center;
+}
+
+.dark .empty-state-icon {
+  @apply bg-blue-900;
+}
+
+/* Estilos para headers */
+.app-header {
+  @apply bg-white shadow-sm border-b border-gray-200;
+}
+
+.dark .app-header {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.header-title {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.dark .header-title {
+  @apply text-gray-100;
+}
+
+/* Estilos para tabs */
+.tab-container {
+  @apply flex border-b border-gray-200;
+}
+
+.dark .tab-container {
+  @apply border-gray-700;
+}
+
+.tab-item {
+  @apply px-4 py-2 text-sm font-medium border-b-2 transition-colors duration-200;
+}
+
+.tab-item.active {
+  @apply border-blue-600 text-blue-600;
+}
+
+.dark .tab-item.active {
+  @apply border-blue-400 text-blue-400;
+}
+
+.tab-item.inactive {
+  @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+}
+
+.dark .tab-item.inactive {
+  @apply text-gray-400 hover:text-gray-300 hover:border-gray-600;
+}
+
+/* Efectos hover para botones del header */
+.header-button {
+  @apply p-2 rounded-lg transition-all duration-200;
+}
+
+.header-button:hover {
+  @apply transform scale-105;
+}
+
+/* Estilos para el estado de carga */
+.form-loading {
+  @apply opacity-50 pointer-events-none;
+}
+
+/* Estilos para mensajes de confirmación */
+.form-confirmation {
+  @apply bg-green-50 border border-green-200 rounded-lg p-4 mb-6;
+}
+
+.dark .form-confirmation {
+  @apply bg-green-900 border-green-700;
+}
+
+.form-confirmation-text {
+  @apply text-green-800 text-sm;
+}
+
+.dark .form-confirmation-text {
+  @apply text-green-200;
+}
+
+/* Estilos para tooltips */
+.form-tooltip {
+  @apply relative;
+}
+
+.form-tooltip:hover::after {
+  content: attr(data-tooltip);
+  @apply absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-10;
+}
+
+/* Estilos para campos con iconos */
+.form-input-with-icon {
+  @apply relative;
+}
+
+.form-input-with-icon input {
+  @apply pl-10;
+}
+
+.form-input-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400;
+}
+
+/* Estilos para validación en tiempo real */
+.form-input.validating {
+  @apply border-yellow-400;
+}
+
+.form-input.valid {
+  @apply border-green-500;
+}
+
+/* Estilos para campos con autocompletado */
+.form-input:-webkit-autofill {
+  @apply bg-yellow-50;
+}
+
+.dark .form-input:-webkit-autofill {
+  @apply bg-gray-800;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+  .form-container {
+    @apply mx-4;
+  }
+
+  .form-field-row {
+    @apply grid-cols-1;
+  }
+
+  .form-buttons {
+    @apply flex-col space-y-3 space-x-0;
+  }
+
+  .form-button {
+    @apply w-full;
+  }
+}
+
+/* Overview cards spacing */
+:root {
+  --overview-cards-gap: 1rem; /* 16px */
+  --internal-spacing: 0.75rem; /* 12px */
+  --small-spacing: 0.5rem; /* 8px */
+  --tiny-spacing: 0.25rem; /* 4px */
+}
+
+@media (min-width: 640px) {
+  :root {
+    --overview-cards-gap: 1.25rem; /* 20px */
+    --internal-spacing: 1rem; /* 16px */
+    --small-spacing: 0.75rem; /* 12px */
+    --tiny-spacing: 0.5rem; /* 8px */
+  }
+}
+
+.overview-cards-container {
+  gap: var(--overview-cards-gap);
+}
+
+.internal-spacing {
+  gap: var(--internal-spacing);
+}
+
+.small-spacing {
+  gap: var(--small-spacing);
+}
+
+.tiny-spacing {
+  gap: var(--tiny-spacing);
+}
+
+/* Estilos para marcadores del mapa */
+.map-marker-label {
+  background: white;
+  border: 2px solid #3b82f6;
+  border-radius: 50%;
+  padding: 4px;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Google Maps InfoWindow tweaks: remove default white background/padding and extra spacing */
+.gm-style .gm-style-iw,
+.gm-style .gm-style-iw-c {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+.dark .gm-style .gm-style-iw,
+.dark .gm-style .gm-style-iw-c {
+  background: transparent !important;
+  border: none !important;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: visible !important;
+  padding: 0 !important;
+}
+
+/* Ensure the pointer triangle is visible */
+.gm-style .gm-style-iw-tc::after,
+.gm-style .gm-style-iw-tc::before {
+  display: block !important;
+}
+
+/* Tighter close button positioning */
+.gm-style .gm-style-iw-chr {
+  top: 6px !important;
+  right: 6px !important;
+  width: 20px !important;
+  height: 20px !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .gm-style .gm-style-iw-chr {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Wrapper around our custom card to trim remaining gutters */
+.map-iw-wrapper {
+  margin: 0 !important;
+}
+
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

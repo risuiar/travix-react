@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Solo incrementar versión si estamos en la rama main
+if [ "$(git branch --show-current)" = "main" ]; then
+  echo "🚀 Merge to main detected - incrementing version..."
+  node scripts/merge-to-main-version.js
+else
+  echo "ℹ️  Not on main branch - skipping version increment"
+fi

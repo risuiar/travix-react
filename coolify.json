@@ -1,0 +1,34 @@
+{
+  "name": "travix",
+  "type": "static",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "environmentVariables": {
+    "VITE_MAPBOX_TOKEN": {
+      "description": "Mapbox API Token para autocompletado de ciudades",
+      "required": true
+    },
+    "VITE_SUPABASE_URL": {
+      "description": "Supabase project URL",
+      "required": true
+    },
+    "VITE_SUPABASE_ANON_KEY": {
+      "description": "Supabase anonymous key",
+      "required": true
+    },
+    "VITE_AI_API_URL": {
+      "description": "AI API URL (opcional)",
+      "required": false
+    },
+    "VITE_AI_API_KEY": {
+      "description": "AI API Key (opcional)",
+      "required": false
+    }
+  },
+  "buildSettings": {
+    "nodeVersion": "20",
+    "npmVersion": "10"
+  }
+}
