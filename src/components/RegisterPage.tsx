@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Mail, Lock, Eye, EyeOff, XCircle, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useUserAuthContext } from "../contexts/useUserAuthContext";
+import { queryClient } from "../utils/queryClient";
+import { useLanguage } from "../hooks/useLanguage";
+import { useAnalytics } from "../hooks/useAnalytics";
 
 import { Link } from "react-router-dom";
 import LanguageSelector from "./LanguageSelector";
+import { FacebookLoginButton } from "./AuthButtons/FacebookLoginButton.tsx";
 
 interface RegisterPageProps {
   onBackToHome?: () => void;
@@ -23,6 +29,10 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToHome }) => {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
+  const { trackEvent } = useAnalytics();
+  const { refetch } = useUserAuthContext();
 
   const getTermsUrl = () => {
     const currentLanguage = i18n.language;
@@ -186,6 +196,36 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToHome }) => {
     window.location.href = "/google-terms";
   };
 
+  const handleRegisterSuccess = () => {
+    // Track successful registration
+    trackEvent("registration_successful", {
+      method: "oauth",
+      user_language: currentLanguage,
+    });
+    // Refrescar datos de usuario y esperar actualización antes de navegar
+    if (refetch) {
+      refetch();
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["travel"] });
+        navigate("/travels");
+      }, 400);
+    } else {
+      navigate("/travels");
+    }
+  };
+
+  const handleRegisterError = (error: Error | string) => {
+    // Track registration error
+    trackEvent("registration_failed", {
+      error: error instanceof Error ? error.message : String(error),
+      user_language: currentLanguage,
+    });
+
+    console.error("Error en registro:", error);
+    // Mostrar el error como alert por ahora
+    alert(error instanceof Error ? error.message : error);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 relative">
       {/* Language Selector - Top Right */}
@@ -251,199 +291,210 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onBackToHome }) => {
             </svg>
             {t("register.signUpWithGoogle", "Registrarse con Google")}
           </button>
+
+          <FacebookLoginButton
+            onLoginSuccess={handleRegisterSuccess}
+            onLoginError={handleRegisterError}
+            variant="secondary"
+          />
         </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-              {t("login.or", "o")}
-            </span>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t("login.fullName", "Nombre Completo")}
-            </label>
+        {/* Formulario de email desactivado - comentado para desactivar login/registro con email */}
+        {/* {(
+          <>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder={t(
-                  "login.fullNamePlaceholder",
-                  "Ingresa tu nombre completo"
-                )}
-              />
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                  {t("login.or", "o")}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t("login.email", "Email")}
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder={t("login.emailPlaceholder", "Ingresa tu email")}
-              />
-            </div>
-          </div>
+            <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("login.fullName", "Nombre Completo")}
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    placeholder={t(
+                      "login.fullNamePlaceholder",
+                      "Ingresa tu nombre completo"
+                    )}
+                  />
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t("login.password", "Contraseña")}
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder={t(
-                  "login.passwordPlaceholder",
-                  "Ingresa tu contraseña"
-                )}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("login.email", "Email")}
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    placeholder={t("login.emailPlaceholder", "Ingresa tu email")}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("login.password", "Contraseña")}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    placeholder={t(
+                      "login.passwordPlaceholder",
+                      "Ingresa tu contraseña"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("login.confirmPassword", "Confirmar Contraseña")}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    placeholder={t(
+                      "login.confirmPasswordPlaceholder",
+                      "Confirma tu contraseña"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Checkbox de términos y condiciones */}
+              <div className="flex items-start space-x-3">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                </div>
+                <div className="text-sm">
+                  <label
+                    htmlFor="terms"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    {t("register.acceptTerms", "Acepto los")}{" "}
+                    <a
+                      href={getTermsUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                    >
+                      {t("register.termsAndConditions", "términos y condiciones")}
+                    </a>
+                  </label>
+                </div>
+              </div>
+
+              {/* Checkbox de política de privacidad */}
+              <div className="flex items-start space-x-3">
+                <div className="flex items-center h-5">
+                  <input
+                    id="privacy"
+                    name="privacy"
+                    type="checkbox"
+                    checked={acceptedPrivacy}
+                    onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                </div>
+                <div className="text-sm">
+                  <label
+                    htmlFor="privacy"
+                    className="text-gray-700 dark:text-gray-300"
+                  >
+                    {t("register.acceptPrivacy", "Acepto la")}{" "}
+                    <a
+                      href={getPrivacyUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                    >
+                      {t("register.privacyPolicy", "política de privacidad")}
+                    </a>
+                  </label>
+                </div>
+              </div>
+
+              {error && (
+                <div className="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                  <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <span className="text-sm text-red-700 dark:text-red-400">
+                    {error}
+                  </span>
+                </div>
+              )}
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {t("login.creatingAccount", "Creando cuenta...")}
+                  </span>
                 ) : (
-                  <Eye className="w-5 h-5" />
+                  t("login.createAccount", "Crear Cuenta")
                 )}
               </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t("login.confirmPassword", "Confirmar Contraseña")}
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder={t(
-                  "login.confirmPasswordPlaceholder",
-                  "Confirma tu contraseña"
-                )}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Checkbox de términos y condiciones */}
-          <div className="flex items-start space-x-3">
-            <div className="flex items-center h-5">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-            </div>
-            <div className="text-sm">
-              <label
-                htmlFor="terms"
-                className="text-gray-700 dark:text-gray-300"
-              >
-                {t("register.acceptTerms", "Acepto los")}{" "}
-                <a
-                  href={getTermsUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline"
-                >
-                  {t("register.termsAndConditions", "términos y condiciones")}
-                </a>
-              </label>
-            </div>
-          </div>
-
-          {/* Checkbox de política de privacidad */}
-          <div className="flex items-start space-x-3">
-            <div className="flex items-center h-5">
-              <input
-                id="privacy"
-                name="privacy"
-                type="checkbox"
-                checked={acceptedPrivacy}
-                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-            </div>
-            <div className="text-sm">
-              <label
-                htmlFor="privacy"
-                className="text-gray-700 dark:text-gray-300"
-              >
-                {t("register.acceptPrivacy", "Acepto la")}{" "}
-                <a
-                  href={getPrivacyUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 underline"
-                >
-                  {t("register.privacyPolicy", "política de privacidad")}
-                </a>
-              </label>
-            </div>
-          </div>
-
-          {error && (
-            <div className="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-              <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-              <span className="text-sm text-red-700 dark:text-red-400">
-                {error}
-              </span>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {t("login.creatingAccount", "Creando cuenta...")}
-              </span>
-            ) : (
-              t("login.createAccount", "Crear Cuenta")
-            )}
-          </button>
-        </form>
+            </form>
+          </>
+        )} */}
 
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">

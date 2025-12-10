@@ -96,8 +96,8 @@ const LoginPage: React.FC = () => {
           <AuthButtonsContainer
             onLoginSuccess={handleLoginSuccess}
             onLoginError={handleLoginError}
-            showFacebookAuth={false}
-            showEmailAuth={true}
+            showFacebookAuth={true}
+            showEmailAuth={false}
           />
 
           {/* Información adicional */}
@@ -108,9 +108,8 @@ const LoginPage: React.FC = () => {
                 "Al continuar, aceptas nuestros términos de servicio y política de privacidad"
               )}{" "}
               <a
-                href={`https://travix.app${
-                  currentLanguage === "en" ? "" : `/${currentLanguage}`
-                }/terms`}
+                href={`https://travix.app${currentLanguage === "en" ? "" : `/${currentLanguage}`
+                  }/terms`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
@@ -119,9 +118,8 @@ const LoginPage: React.FC = () => {
               </a>{" "}
               {t("common.and", "y")}{" "}
               <a
-                href={`https://travix.app${
-                  currentLanguage === "en" ? "" : `/${currentLanguage}`
-                }/privacy`}
+                href={`https://travix.app${currentLanguage === "en" ? "" : `/${currentLanguage}`
+                  }/privacy`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
