@@ -35,6 +35,7 @@ import "./index.css";
 import "./i18n";
 import { Walkthrough, HelpButton } from "./components/Walkthrough";
 import { useWalkthrough } from "./hooks/useWalkthrough";
+import { useUserAuthContext } from "./contexts/useUserAuthContext";
 import FeedbackModal from "./components/Modal/FeedbackModal";
 
 // Lazy load HowWorks for better performance
@@ -47,6 +48,7 @@ function ScrollToTopHandler() {
 
 function AppContent() {
   const location = useLocation();
+  const { user } = useUserAuthContext();
   const { showWalkthrough, openWalkthrough, closeWalkthrough } =
     useWalkthrough();
 
@@ -160,8 +162,8 @@ function AppContent() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
-      {/* Elementos globales fuera de <Routes> */}
-      {location.pathname !== "/login" && (
+      {/* Elementos globales fuera de <Routes> - solo para usuarios autenticados */}
+      {user && (
         <>
           <Footer />
           <Walkthrough
