@@ -54,38 +54,48 @@ export const fetchUserAuthData = async (): Promise<UserAuthData | null> => {
     // @ts-expect-error - Debug log for development
     console.log("SUPABASE_ANON_KEY:", supabase?.key);
 
-    const { data, error } = await supabase
-      .from("user_auth_data")
-      .select(
-        `
-        id,
-        email,
-        email_confirmed_at,
-        created_at,
-        updated_at,
-        last_sign_in_at,
-        full_name,
-        avatar_url,
-        default_currency,
-        language,
-        theme,
-        trip_reminders,
-        budget_alerts,
-        activity_reminders,
-        login_count,
-        premium_status,
-        premium_until,
-        accepted_terms,
-        email_verified,
-        last_login
-      `
-      )
-      .single();
-    if (error) {
-      console.error("Error fetching user auth data:", error);
+    if (!user) {
+      console.warn("No auth user found.");
       return null;
     }
-    return data;
+
+    // Obtener los datos del perfil desde la tabla segura
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error("Error fetching user profile data:", profileError);
+    }
+
+    const authData: UserAuthData = {
+      id: user.id,
+      email: user.email || "",
+      email_confirmed_at: user.email_confirmed_at || null,
+      created_at: user.created_at,
+      updated_at: user.updated_at || null,
+      last_sign_in_at: user.last_sign_in_at || null,
+      app_metadata: user.app_metadata,
+      user_metadata: user.user_metadata,
+      full_name: profileData?.full_name || null,
+      avatar_url: profileData?.avatar_url || null,
+      default_currency: profileData?.default_currency || null,
+      language: profileData?.language || null,
+      theme: profileData?.theme || null,
+      trip_reminders: profileData?.trip_reminders ?? null,
+      budget_alerts: profileData?.budget_alerts ?? null,
+      activity_reminders: profileData?.activity_reminders ?? null,
+      login_count: profileData?.login_count ?? null,
+      premium_status: profileData?.premium_status || null,
+      premium_until: profileData?.premium_until || null,
+      accepted_terms: profileData?.accepted_terms ?? null,
+      email_verified: profileData?.email_verified ?? null,
+      last_login: profileData?.last_login || null,
+    };
+
+    return authData;
   } catch (error) {
     console.error("Error in fetchUserAuthData:", error);
     return null;
