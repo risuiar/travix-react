@@ -99,3 +99,6 @@ temp/
 
 # Vite
 .vite/
+
+# Supabase CLI temp files
+supabase/.temp/
